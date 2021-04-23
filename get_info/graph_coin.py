@@ -1,9 +1,13 @@
 import plotly.graph_objects as go
 import plotly.express as px
 import pyodbc
+import socket
+server = socket.gethostname()
+server += "\\SQLEXRPESS"
+
 
 def get_x_data_string(coin):
-    connection = pyodbc.connect('Driver={SQL Server};''Server=JAMES-LAPTOP\SQLEXPRESS;''Database=crypot;''Trusted_Connection=yes;')
+    connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
     cursor = connection.cursor()
     query = ("SELECT time FROM crypot.dbo."+coin+" ORDER BY time asc")
     cursor.execute(query)
@@ -14,7 +18,7 @@ def get_x_data_string(coin):
     return x
 
 def get_y_data_string(coin):
-    connection = pyodbc.connect('Driver={SQL Server};''Server=JAMES-LAPTOP\SQLEXPRESS;''Database=crypot;''Trusted_Connection=yes;')
+    connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
     cursor = connection.cursor()
     query = ("SELECT price FROM crypot.dbo."+coin+" ORDER BY time asc") 
     cursor.execute(query)
@@ -25,7 +29,7 @@ def get_y_data_string(coin):
     return y
 
 def get_x_buy_data(coin):
-    connection = pyodbc.connect('Driver={SQL Server};''Server=JAMES-LAPTOP\SQLEXPRESS;''Database=crypot;''Trusted_Connection=yes;')
+    connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
     cursor = connection.cursor()
     query = ("select time_aquired from crypot.dbo.investment_buy_events where symbol = '"+coin+"' order by time_aquired asc;")
     cursor.execute(query)
@@ -37,7 +41,7 @@ def get_x_buy_data(coin):
     return x
 
 def get_y_buy_data(coin):
-    connection = pyodbc.connect('Driver={SQL Server};''Server=JAMES-LAPTOP\SQLEXPRESS;''Database=crypot;''Trusted_Connection=yes;')
+    connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
     cursor = connection.cursor()
     query = ("select price_when_aquired from crypot.dbo.investment_buy_events where symbol = '"+coin+"' order by time_aquired asc;")
     cursor.execute(query)

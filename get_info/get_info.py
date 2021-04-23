@@ -3,6 +3,10 @@ import json
 import pyodbc
 import datetime
 import time
+import socket
+server = socket.gethostname()
+server += "\\SQLEXRPESS"
+
 
 sleep_time = 15
 
@@ -24,7 +28,6 @@ def get_gmt_time():
 
 def get_info():
     global sleep_time
-    global dataArray
     sleep_increment = 1
     while True:
         try:
@@ -53,7 +56,7 @@ def get_info():
         print('Tock')
 
 def set_connection_status(status):
-    connection = pyodbc.connect('Driver={SQL Server};''Server=JAMES-LAPTOP\SQLEXPRESS;''Database=crypot;''Trusted_Connection=yes;')
+    connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
     cursor = connection.cursor()
     query = ("update connection_status set current_connection = ? where sn = 1")
     cursor.execute(query, status)
@@ -68,7 +71,7 @@ def write_to_file(data):
         file.write(str(item) + '\n')
 
 def write_to_db(data):
-    connection = pyodbc.connect('Driver={SQL Server};''Server=JAMES-LAPTOP\SQLEXPRESS;''Database=crypot;''Trusted_Connection=yes;')
+    connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
     cursor = connection.cursor()
     query = ("(select TABLE_NAME from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA = 'dbo' and TABLE_NAME = ?)")
     cursor.execute(query, data.symbol)
