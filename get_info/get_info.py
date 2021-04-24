@@ -5,7 +5,7 @@ import datetime
 import time
 import socket
 server = socket.gethostname()
-server += "\\SQLEXRPESS"
+server += "\\SQLEXPRESS"
 
 
 sleep_time = 15

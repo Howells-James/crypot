@@ -6,7 +6,8 @@ import pyinputplus as inp
 import socket
 
 server = socket.gethostname()
-server += "\\SQLEXRPESS"
+server += "\\SQLEXPRESS"
+print("Connection String: " + 'Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
 
 def get_gmt_time():
     return datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")
@@ -201,7 +202,7 @@ def get_all_stored_coins():
     query = ("select TABLE_NAME from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA = 'dbo'")
     cursor.execute(query)
     #exclude these tables from returned list. Need to deal with USD table differently 
-    investment_tables = ('current_holdings', 'investment_buy_events', 'investment_sell_events', 'USD', 'connection_status')
+    investment_tables = ('current_holdings', 'investment_buy_events', 'investment_sell_events', 'USD', 'connection_status', 'sysdiagrams')
     coin_tables = []
     for item in cursor:
         if item[0] not in investment_tables:

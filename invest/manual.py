@@ -4,6 +4,9 @@ import datetime
 import time
 import pyinputplus as inp
 import invest as inv
+import sys
+sys.path.append('../')
+import graph_coin as gc
 
 def main():
     while(True):
@@ -61,6 +64,9 @@ def report(type_of_report):
     elif type_of_report == 'money':
         current_balance = inv.get_USD()
         print("current USD $" + str(current_balance))
+    elif type_of_report == 'graph':
+        coin = input("symbol? ")
+        gc.main(coin)
 
 def help():
     print("actions: buy, sell, report, exit, restart")

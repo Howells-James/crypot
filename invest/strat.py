@@ -5,6 +5,10 @@ import datetime
 import time
 import random 
 import invest as inv
+import socket
+
+server = socket.gethostname()
+server += "\\SQLEXPRESS"
 
 def going_up(coin):
     #get current value
@@ -28,7 +32,7 @@ def greater_than_buy(coin):
         return -1
 
 def get_connection_status():
-    connection = pyodbc.connect('Driver={SQL Server};''Server=JAMES-LAPTOP\SQLEXPRESS;''Database=crypot;''Trusted_Connection=yes;')
+    connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
     cursor = connection.cursor()
     #this query needs to sum up number of units involved in buy events in table
     query = ("select current_connection from connection_status where sn = 1")
