@@ -6,9 +6,11 @@ import socket
 server = socket.gethostname()
 server += "\\SQLEXPRESS"
 
+connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
+
 
 def get_x_data_string(coin):
-    connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
+    global connection
     cursor = connection.cursor()
     query = ("SELECT time FROM crypot.dbo."+coin+" ORDER BY time asc")
     cursor.execute(query)
@@ -19,7 +21,7 @@ def get_x_data_string(coin):
     return x
 
 def get_y_data_string(coin):
-    connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
+    global connection
     cursor = connection.cursor()
     query = ("SELECT price FROM crypot.dbo."+coin+" ORDER BY time asc") 
     cursor.execute(query)
@@ -30,7 +32,7 @@ def get_y_data_string(coin):
     return y
 
 def get_x_buy_data(coin):
-    connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
+    global connection
     cursor = connection.cursor()
     query = ("select time_aquired from crypot.dbo.investment_buy_events where symbol = '"+coin+"' order by time_aquired asc;")
     cursor.execute(query)
@@ -41,7 +43,7 @@ def get_x_buy_data(coin):
     return x
 
 def get_units_data(coin):
-    connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
+    global connection
     cursor = connection.cursor()
     query = ("select units from crypot.dbo.investment_buy_events where symbol = '"+coin+"' order by time_aquired asc;")
     cursor.execute(query)
@@ -52,7 +54,7 @@ def get_units_data(coin):
     return x
 
 def get_y_buy_data(coin):
-    connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
+    global connection
     cursor = connection.cursor()
     query = ("select price_when_aquired from crypot.dbo.investment_buy_events where symbol = '"+coin+"' order by time_aquired asc;")
     cursor.execute(query)
@@ -131,3 +133,4 @@ def main(coin):
     fig.add_trace(go.Scatter(x=xlist, y=ylist2, mode='markers', marker_size=10))
     fig.show()
     timeSliceList.clear()
+
