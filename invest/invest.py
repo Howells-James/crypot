@@ -28,6 +28,16 @@ def reset_investment_tables():
     cursor.execute(resett_usd_amount)
     connection.commit()
 
+def reset_coin_tables():
+    connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
+    cursor = connection.cursor()
+    coins = get_all_stored_coins()
+    if coins is not None:
+        for coin in coins:
+            delete_coin_tables = ("drop table crypot.dbo."+coin+";")
+            cursor.execute(delete_coin_tables)
+    connection.commit()
+
 #delete all information from all tables TODO
 
 

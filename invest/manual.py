@@ -23,6 +23,8 @@ def main():
             report(input("type? "))
         elif action == 'restart':
             inv.reset_investment_tables()
+        elif action == 'restart coins':
+            inv.reset_coin_tables()
         elif action == 'help':
             help()
         elif action == 'exit':
@@ -77,7 +79,9 @@ def help():
     print(" -- all: prints report for all owned coing")
     print(" -- money: prints amount of USD you have left")
     print(" -- market: prints current market data, market data refreshes every 20 second")
+    print(" -- graph: prints a graph of coin history, buys and sells")
     print("restart: clears all investments, and resets USD amount to $100")
+    print("restart coins: clears all stored info on coins")
     print("exit: exit investor program, data collector will still be running")
 
 main()
