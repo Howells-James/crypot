@@ -301,6 +301,18 @@ def get_sum_sell_events(symbol):
     connection.commit()
     return total
 
+#gets coin value at time closest to passed dattime value
+def get_coin_value_at_time(symbol, time):
+    connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
+    cursor = connection.cursor()
+    query = ("select top 1 price from crypot.dbo."+symbol+" where time > '"+time+"' order by time asc;")
+    cursor.execute(query)
+    total = 0
+    for item in cursor:
+        total += item[0]
+    connection.commit()
+    return total
+
 #return total num_units for symbol in investment_buy_events table
 def get_sum_buy_events(symbol):
     connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')

@@ -8,7 +8,7 @@ server = socket.gethostname()
 server += "\\SQLEXPRESS"
 
 
-sleep_time = 15
+sleep_time = 150
 
 #this script needs to be run continuesly in the background. It makes the api calls that collect price and time information 
 #for each currency.
@@ -28,13 +28,13 @@ def get_gmt_time():
 
 def get_info():
     global sleep_time
-    sleep_increment = 1
+    sleep_increment = 0
     while True:
         try:
             req = requests.get("https://data.messari.io/api/v1/assets?fields=id,slug,symbol,metrics/market_data/price_usd")
             market_data = json.loads(req.text)
             set_connection_status(1)
-            sleep_increment = 1
+            sleep_increment = 0
             #print(json.loads(req.text)) #print raw response
             for x in range(0, 20):
                 timestamp = market_data["status"]["timestamp"]
@@ -49,7 +49,7 @@ def get_info():
             set_connection_status(0)
             print("connection error, backing off for " + str(sleep_time + sleep_increment) + " seconds")
             time.sleep(sleep_time + sleep_increment)
-            sleep_increment = sleep_increment + 9
+            sleep_increment = sleep_increment + 10
             continue      
         print("Tick")
         time.sleep(sleep_time)
