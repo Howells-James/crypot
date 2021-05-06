@@ -8,6 +8,7 @@ import socket
 server = socket.gethostname()
 server += "\\SQLEXPRESS"
 print("Connection String: " + 'Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
+connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
 
 def get_gmt_time():
     return datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%Z")
@@ -16,7 +17,7 @@ def get_gmt_time():
 
 #deletes all information from the investment tables
 def reset_investment_tables():
-    connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
+    global connection
     cursor = connection.cursor()
     delete_buy_events = ("delete from investment_buy_events")
     delete_sell_events = ("delete from investment_sell_events")
@@ -43,7 +44,7 @@ def reset_coin_tables():
 
 #returns true if a table exists for the symbol
 def coin_exists(symbol):
-    connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
+    global connection
     cursor = connection.cursor()
     query = ("(select TABLE_NAME from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA = 'dbo' and TABLE_NAME = ?)")
     cursor.execute(query, symbol)
@@ -55,7 +56,7 @@ def coin_exists(symbol):
 
 #returns true if symbol is in current_holdings
 def is_in_table(symbol):
-    connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
+    global connection
     cursor = connection.cursor()
     query = ("select count(1) from crypot.dbo.current_holdings where symbol = ?") 
     cursor.execute(query, symbol)
@@ -75,7 +76,7 @@ def buy_buy_buy(num_units, time, symbol):
         print("can't buy 0 coins")
         return
     if coin_exists(symbol):
-        connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
+        global connection
         cursor = connection.cursor()
         query = ("insert into crypot.dbo.investment_buy_events (units, time_aquired, transaction_id, symbol, price_when_aquired) values (?,?,?,?,?)") 
         price_when_aquired = get_current_price_from_db(symbol)
@@ -105,7 +106,7 @@ def buy_in_USD(usd_amount, time, symbol):
 
 #sells USD for coins, used in buy_buy_buy
 def sell_USD(amount):
-    connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
+    global connection
     cursor = connection.cursor()
     query = ("update crypot.dbo.USD set units = (select units from crypot.dbo.USD where sn = 1) - ?")
     cursor.execute(query, amount)
@@ -121,7 +122,7 @@ def sell_sell_sell(num_units, time, symbol):
     if float(num_units) > float(current_holdings):
         print("not enough to sell that much " + symbol)
     else:
-        connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
+        global connection
         cursor = connection.cursor()
         transaction_id = int(get_transaction_number('sell')) + 1
         current_price = get_current_price_from_db(symbol)
@@ -140,7 +141,7 @@ def sell_sell_sell(num_units, time, symbol):
 
 #used in sell_sell_sell, adds the value of sold coin to the USD table
 def buy_USD(amount):
-    connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
+    global connection
     cursor = connection.cursor()
     query = ("update crypot.dbo.usd set units = (select units from crypot.dbo.usd where sn = 1) + ? where sn = 1")
     cursor.execute(query, amount)
@@ -150,7 +151,7 @@ def buy_USD(amount):
 
 #updates current_holdings table with the values of coins bought at the time of buy event
 def update_cumulative_spent(num_units, symbol, to_zero):
-    connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
+    global connection
     cursor = connection.cursor()
     query = ("update crypot.dbo.current_holdings set cumulative_spending_historic = (select cumulative_spending_historic from current_holdings where symbol = ?) + ? where symbol = ?;")
     query2 = ("update crypot.dbo.current_holdings set cumulative_spending_since_zero = (select cumulative_spending_since_zero from current_holdings where symbol = ?) + ? where symbol = ?;")
@@ -163,7 +164,7 @@ def update_cumulative_spent(num_units, symbol, to_zero):
 
 #takes in symbol and updates the current_holdings table based on what is in buy_events and sell_events
 def update_current_holdings(symbol):
-    connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
+    global connection
     cursor = connection.cursor()
     #this will always fuck up the since zero measure
     current_holdings = get_sum_buy_events(symbol) - get_sum_sell_events(symbol)
@@ -183,7 +184,7 @@ def update_current_holdings(symbol):
 ### ALL REPORT FUCNTIONS BELOW HERE
 
 def get_spend_since_zero(symbol):
-    connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
+    global connection
     cursor = connection.cursor()
     query = ("select cumulative_spending_since_zero from current_holdings where symbol = ?")
     amount = -1
@@ -195,7 +196,7 @@ def get_spend_since_zero(symbol):
 
 #returns current amount of USD 
 def get_USD():
-    connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
+    global connection
     cursor = connection.cursor()
     query = ("select units from crypot.dbo.USD where sn = 1")
     cursor.execute(query)
@@ -207,7 +208,7 @@ def get_USD():
 
 #returns list of all current tables for coin values
 def get_all_stored_coins():
-    connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
+    global connection
     cursor = connection.cursor()
     query = ("select TABLE_NAME from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA = 'dbo'")
     cursor.execute(query)
@@ -222,7 +223,7 @@ def get_all_stored_coins():
 
 #returns the current # of coins held for a coin type designated by Symbol parameter
 def get_current_holdings(symbol):
-    connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
+    global connection
     cursor = connection.cursor()
     #this query needs to sum up number of units involved in buy events in table
     query = ("select current_holdings from crypot.dbo.current_holdings where symbol = ?;")
@@ -237,7 +238,7 @@ def get_current_holdings(symbol):
 
 #returns current total spent on the symbol
 def get_cumulative_total(symbol):
-    connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
+    global connection
     cursor = connection.cursor()
     query = ("select cumulative_spending_historic from crypot.dbo.current_holdings where symbol = ?") 
     cursor.execute(query, symbol)   
@@ -257,7 +258,7 @@ def get_holdings_value(symbol):
 
 #returns the latest entry in the coin table specified by the Symbol parameter
 def get_current_price_from_db(symbol):
-    connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
+    global connection
     cursor = connection.cursor()
     query = ("SELECT TOP 1 price FROM crypot.dbo."+symbol+" ORDER BY time DESC") #get latest entry in table #TODO ????????
     cursor.execute(query)
@@ -267,7 +268,7 @@ def get_current_price_from_db(symbol):
 
 # Returns second most recent entry in table
 def get_previous_price_from_db(symbol):
-    connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
+    global connection
     cursor = connection.cursor()
     query = ("SELECT price FROM crypot.dbo."+symbol+" ORDER BY time DESC OFFSET 1 ROWS FETCH NEXT 1 ROWS ONLY") 
     cursor.execute(query)
@@ -278,7 +279,7 @@ def get_previous_price_from_db(symbol):
 
 #returns the transaction_id of the most recent transaction in the investments table
 def get_transaction_number(buy_sell):
-    connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
+    global connection
     cursor = connection.cursor()
     query = ("SELECT TOP 1 transaction_id FROM crypot.dbo.investment_"+buy_sell+"_events ORDER BY transaction_id DESC") #get last transaction
     cursor.execute(query)
@@ -290,7 +291,7 @@ def get_transaction_number(buy_sell):
 
 #return total num_units for symbol in investment_sell_events table
 def get_sum_sell_events(symbol):
-    connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
+    global connection
     cursor = connection.cursor()
     #this query needs to sum up number of units involved in buy events in table
     query = ("select units from crypot.dbo.investment_sell_events where symbol = ?;")
@@ -315,7 +316,7 @@ def get_coin_value_at_time(symbol, time):
 
 #return total num_units for symbol in investment_buy_events table
 def get_sum_buy_events(symbol):
-    connection = pyodbc.connect('Driver={SQL Server};''Server='+server+';''Database=crypot;''Trusted_Connection=yes;')
+    global connection
     cursor = connection.cursor()
     #this query needs to sum up number of units involved in buy events in table
     query = ("select units from crypot.dbo.investment_buy_events where symbol = ?;")
